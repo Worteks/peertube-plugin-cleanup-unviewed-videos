@@ -1,0 +1,12 @@
+
+.manage-unviewed {
+  display: none;
+}
+
+.show-manage-unviewed .manage-unviewed {
+  display: inline-block;
+}
+
+.right-form {
+    margin-left: 2rem;
+}
