@@ -4,6 +4,7 @@
 // import { UserRole } from '@peertube/peertube-models'
 
 var defaultYears = 10
+var enableDeletion = false
 
 function register ({ registerHook, registerSettingsScript, registerClientRoute, peertubeHelpers, settingsManager}) {
    
@@ -15,7 +16,7 @@ function register ({ registerHook, registerSettingsScript, registerClientRoute, 
   registerHook({
     target: 'action:auth-user.information-loaded',
       handler: ({ user }) => {
-//          if ( user.role.id == UserRole.ADMINISTRATOR )
+//        0 : UserRole.ADMINISTRATOR 
           if ( user.role.id == 0 )
           {
               document.body.classList.add('show-manage-unviewed')
@@ -81,26 +82,24 @@ function register ({ registerHook, registerSettingsScript, registerClientRoute, 
     }
 
     function validateFormOnSubmit(event) {
-        console.log(document.body.classList);
-        document.body.classList.add('video-deletion-running')
-        console.log('validate form on submit')
         console.log(event)
-        console.log(event.target.elements[0].value)
-        console.log('' + document.defaultView.localStorage.getItem("access_token"))
+        if ( event.submitter.name == 'select-unviewed' )
+        {
+            console.log(document.body.classList);
+            document.body.classList.add('video-deletion-running')
+            console.log('validate form on submit')
 
-        getLocalVideosList()
+            console.log(event.target.elements[0].value)
+            console.log('' + document.defaultView.localStorage.getItem("access_token"))
+
+            getLocalVideosList()
+        }
     }
 
     
   registerClientRoute({
     route: 'manage-unviewed/route',
       onMount: ({ rootEl }) => {
-
-          peertubeHelpers.getSettings()
-              .then(s => {
-                  console.log(s)
-                  defaultYears=s['default-years']
-              })
 
           const div=document.createElement('div')
           div.setAttribute('class','right-form')
@@ -114,8 +113,7 @@ function register ({ registerHook, registerSettingsScript, registerClientRoute, 
               form.attachEvent('onsubmit', (event) => submitHandler(event) );
           }
           form.action="validateFromOnSubmit()";
-
-          form.innerHTML='<div>number of years ago</div><input type="number" name="number-of-years-ago" value="' + defaultYears + '"><br><input type="submit" value="Delete"></div>';
+          form.innerHTML='<div>number of years ago</div><input type="number" name="number-of-years-ago" value="' + defaultYears + '"><br><input type="submit" name="select-unviewed" value="Select"><input type="submit" name="delete-unviewed" value="Delete"></div>';          
           div.appendChild(title);
           div.appendChild(form);
           const progressBar=document.createElement('progress');
@@ -142,17 +140,6 @@ function register ({ registerHook, registerSettingsScript, registerClientRoute, 
     }
   })
 
-  // WebSocket
-
-  const baseScheme = window.location.protocol === 'https:'
-    ? 'wss:'
-    : 'ws:'
-
-  const socket = new WebSocket(baseScheme + '//' + window.location.host + peertubeHelpers.getBaseWebSocketRoute() + '/toto');
-
-  socket.addEventListener('message', (event) => {
-    console.log(event.data)
-  })
 }
 
 export {
@@ -166,20 +153,45 @@ function addProgressRow(progress,text) {
 }
 
 function onApplicationInit (peertubeHelpers) {
-  console.log('Mnaage Unviewed')
+  console.log('Manage Unviewed')
 
   const baseStaticUrl = peertubeHelpers.getBaseStaticRoute()
-  const imageUrl = baseStaticUrl + '/images/chocobo.png'
-
-  const topLeftBlock = document.querySelector('.top-left-block')
-
-  topLeftBlock.style.backgroundImage = 'url(' + imageUrl + ')'
-
-  peertubeHelpers.translate('User name')
-   .then(translation => console.log('Translated User name by ' + translation))
 
   peertubeHelpers.getServerConfig()
-    .then(config => console.log('Got server config.', config))
+        .then(config => console.log('Got server config.', config))
+
+  peertubeHelpers.getSettings().then( s => {
+        console.log('Settings ' + s)
+        defaultYears=s['default-years']
+        enableDeletion=s['enable-deletion']
+    })
+
+}
+
+async function deleteVideo(shortUUID,progress,deleteBar) {
+    const url='/api/v1/videos/' + shortUUID
+    const access_token = document.defaultView.localStorage.getItem("access_token");
+ 
+    try {
+        const response = await fetch(url,
+                                     {
+                                         method: 'DELETE',
+                                         headers: {
+                                             "Authorization": "Bearer " + access_token
+                                         },
+                                     });
+        if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+        var deleted = deleteBar.getAttribute('value');
+        deleteBar.setAttribute('value',deleted+1)
+        const text='video deleted ' + shortUUID
+        addProgressRow(progress,text);
+        console.log(text);    
+    } catch (error) {
+        console.error(error.message);
+    }
+
 }
 
 async function getViews(shortUUID,startDate,endDate,progress,deleteBar) {
@@ -190,8 +202,6 @@ async function getViews(shortUUID,startDate,endDate,progress,deleteBar) {
     var totalWatchTime=1
     var totalViewers=1
 
-    var deleted = deleteBar.getAttribute('value');
-    deleteBar.setAttribute('value',deleted+1)
     try {
         const response = await fetch(url,
                                      {
@@ -207,19 +217,37 @@ async function getViews(shortUUID,startDate,endDate,progress,deleteBar) {
         totalWatchTime=json.totalWatchTime;
         totalViewers=json.totalViewers;
         if (( totalWatchTime == 0 ) && ( totalViewers == 0 )) {
-            const text='delete video ' + shortUUID + ' !!'
-            addProgressRow(progress,text);
-            console.log(text);
+            const text='select video for deletion ' + shortUUID
+            addProgressRow(progress,text)
+            console.log(text)
+            return true;
         }
         else {
             const text='skip Video ' + shortUUID + 'since totalWatchTime=' + totalWatchTime  + ' totalViewers=' + totalViewers;
             addProgressRow(progress,text);
             console.log(text);
+            return false;
         }
     } catch (error) {
         console.error(error.message);
     }
+    return false;
 }
+
+async function selectForDeletion(videos) {
+    var collected=new Array()
+    videos.forEach( async (jsonVideo) =>  {
+        var shortUUID=jsonVideo.shortUUID;
+        console.log(shortUUID);
+        const keep = await getViews(shortUUID,startDate,endDate,progress,deleteBar)
+        if ( keep )
+        {
+            collected.push(shortUUID)
+        }
+    })
+    return collected;
+}
+    
 
 async function getLocalVideosList() {
     const access_token = document.defaultView.localStorage.getItem("access_token");
@@ -234,15 +262,15 @@ async function getLocalVideosList() {
 
     const progressBar=document.getElementsByName('progress-bar')[0];
     const progress=document.getElementsByName('progress')[0];
-
+    const deleteUnviewed=document.getElementsByName('delete-unviewed')[0];
+        
     if ( numberOfYearsAgo > 0 )
     {
+        deleteUnviewed.disabled=true;
+        deleteUnviewed.hidden=true;
         const currentDate=new Date();
         var startDate=new Date();
-        // FIXME for test only : in days !
-        startDate.setDate(currentDate.getDate() - ( numberOfYearsAgo ));
-        addProgressRow(progress,'WARNING TEST ONLY in DAYS !!!')
-        // startDate.setDate(currentDate.getDate() - ( numberOfYearsAgo * 365 ));
+        startDate.setDate(currentDate.getDate() - ( numberOfYearsAgo * 365 ));
         const startDateSinceEpoch=(startDate.getTime() / 1000);
         var endDate=currentDate;
         var jsonVideo={}
@@ -298,17 +326,28 @@ async function getLocalVideosList() {
         deleteBar.setAttribute('value',0);
         if ( toDeleteLength > 0 ) {
             deleteBar.setAttribute('max',toDeleteLength - 1);
-            addProgressRow(progress, 'checking ' + toDeleteLength + ' videos.');
-            toDelete.forEach( (jsonVideo) =>  {
-                var shortUUID=jsonVideo.shortUUID;
-                console.log(shortUUID);
-                getViews(shortUUID,startDate,endDate,progress,deleteBar);
-            })
+            addProgressRow(progress, 'checking ' + toDeleteLength + ' videos.')
+            const collected=await selectForDeletion(toDelete)
+            console.log(collected)
+            if ( enableDeletion ) {
+                collected.forEach( shortUUID => {
+                    deleteVideo(shortUUID,progress,deleteBar)
+                })
+            }
+            else {
+                deleteUnviewed.disabled=false;
+                deleteUnviewed.hidden=false;
+            }
+
         }
         else {
             deleteBar.setAttribute('max',0);
             addProgressRow(progress, 'no video published before deletion period.');
             addProgressRow(progress, 'local task compteted.');
+
+            deleteUnviewed.disabled=false;
+            deleteUnviewed.hidden=false;
+
         }
 
     }
