@@ -14,11 +14,6 @@ async function register ({
   peertubeHelpers
 }) {
 
-  registerHook({
-    target: 'unknown-hook',
-    handler: () => console.log('fake hook')
-  })
-
   registerSetting({
     name: 'enable-deletion',
     label: 'Enable deletion',
