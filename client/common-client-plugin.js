@@ -1,4 +1,4 @@
-var defaultYears = 10
+var defaultYears = 3
 var enableDeletion = true
 
 // WARNING test only
@@ -9,7 +9,11 @@ function sleep (time) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
 
-function register ({ registerHook, registerSettingsScript, registerClientRoute, peertubeHelpers, settingsManager}) {
+async function register ({
+    registerHook,
+    registerSettingsScript,
+    registerClientRoute,
+    peertubeHelpers}) {
 
   registerHook({
     target: 'action:application.init',
@@ -162,7 +166,7 @@ function addProgressRow(progress,text) {
     progress.appendChild(p)
 }
 
-function onApplicationInit (peertubeHelpers) {
+async function onApplicationInit (peertubeHelpers) {
   console.log('Manage Unviewed')
 
   const baseStaticUrl = peertubeHelpers.getBaseStaticRoute()
@@ -170,12 +174,11 @@ function onApplicationInit (peertubeHelpers) {
   peertubeHelpers.getServerConfig()
         .then(config => console.log('Got server config.', config))
 
-  peertubeHelpers.getSettings().then( s => {
-        console.log('Settings ' + s)
-        defaultYears=s['default-years']
-//      enableDeletion=s['enable-deletion']
-//      console.log('enableDeletion',enableDeletion)
-    })
+    const settings = await peertubeHelpers.getSettings();
+    console.log('Settings ' + settings)
+    enableDeletion=settings['enable-deletion']
+    defaultYears=settings['default-years']
+    console.log('enableDeletion',enableDeletion)
 
 }
 
@@ -286,6 +289,8 @@ async function selectVideos() {
     const progress=document.getElementsByName('progress')[0];
     const deleteUnviewed=document.getElementsByName('delete-unviewed')[0];
 
+    deleteUnviewed.hidden=!enableDeletion;
+
     // reset stored videos and cleanup textarea
     {
         progress.replaceChildren()
@@ -295,7 +300,6 @@ async function selectVideos() {
     if ( numberOfYearsAgo > 0 )
     {
         deleteUnviewed.disabled=true;
-        deleteUnviewed.hidden= !enableDeletion;
         const currentDate=new Date();
         var startDate=new Date();
         startDate.setDate(currentDate.getDate() - ( numberOfYearsAgo * 365 ));
@@ -400,9 +404,14 @@ async function deleteSelectedVideos()
     const jsonCollected=document.defaultView.localStorage.getItem("selectedVideos",'[]')
     const collected=JSON.parse(jsonCollected)
 
-    collected.forEach( shortUUID => {
-        deleteVideo(shortUUID,progress,deleteBar)
-    })
+    if ( enableDeletion ) {
+        collected.forEach( shortUUID => {
+            deleteVideo(shortUUID,progress,deleteBar)
+        })
+    }
+    else {
+        addProgressRow(progress, 'Deletion disabled in plugin settings.')
+    }
 
     deleteUnviewed.disabled=true;
 }
