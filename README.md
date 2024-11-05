@@ -2,7 +2,15 @@
 
 Allow to delete videos unviewed for a long time.
 
-# Progress
+# Release Notes
+
+0.1.1
+- support number of monthes
+
+0.1.0
+- support for actual deletion
+- collect public, private, instance and un-listed videos
+  note : no choice is possible.
 
 Pre-Alpha
 

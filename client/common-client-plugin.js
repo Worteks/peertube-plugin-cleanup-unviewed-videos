@@ -5,6 +5,40 @@ var enableDeletion = true
 const testForceSelectedVideos = false
 const debugLog = false
 
+// month -> days helpers
+function bisextile(year) {
+    return (
+        ( year % 4 ) == 0)
+        && (  ((year % 100) > 0 ) || ((year % 400) == 0 ) )
+}
+function days(h,year) {
+    return  h*30+Math.round((h-1)/2)
+        +(h%2)
+        +( (h>7) ? 1: 0 ) - ( (h>1) ? 2 - bisextile(year) : 0 )
+}
+
+function delta_days(first,last,year) {
+    let g=days(last,year)
+    let f=days(first,year)
+    return g-f
+}
+
+function delta_days_overlap(monthes,last,year) {
+    let d=0
+
+    if ( monthes <= last ) {
+        d=delta_days(last-monthes,last,year)
+    }
+    else if ( monthes <= 12 ) {
+        let g=days(last,year)
+        let e=delta_days((12+last-monthes),12,year-1)
+        d=g+e
+    }
+    return d
+}
+
+//
+
 function logdebug(info)
 {
     if ( debugLog ) console.log(info);
@@ -110,13 +144,17 @@ async function register ({
           title.append('Unviewed')
           const form=document.createElement('form')
           if (form.addEventListener) {
-              form.addEventListener("submit", (event) => submitHandler(event), true);
+              form.addEventListener("submit",
+                                    (event) => submitHandler(event), true);
           }
           else {
-              form.attachEvent('onsubmit', (event) => submitHandler(event) );
+              form.attachEvent('onsubmit',
+                               (event) => submitHandler(event) );
           }
           form.action="validateFromOnSubmit()";
-          form.innerHTML='<div>number of years ago</div><input type="number" name="number-of-years-ago" value="' + defaultYears + '"><br><input type="submit" name="select-unviewed" value="Select"><input type="submit" name="delete-unviewed" value="Delete"></div>';          
+          form.innerHTML='<div>number of years ago</div><input type="number" name="number-of-years-ago" value="' + defaultYears + '"/>'
+          + '<div>number of monthes ago</div><input type="number" name="number-of-monthes-ago" value="0"/>'
+          + '<br><input type="submit" name="select-unviewed" value="Select"><input type="submit" name="delete-unviewed" value="Delete"></div>';
           div.appendChild(title);
           div.appendChild(form);
           const progressBar=document.createElement('progress');
@@ -136,11 +174,13 @@ async function register ({
           const deleteUnviewed=document.getElementsByName('delete-unviewed')[0];
           deleteUnviewed.hidden=!enableDeletion
           const jsonCollected=document.defaultView.localStorage.getItem("selectedVideos",'[]')
-          const collected=JSON.parse(jsonCollected)
-          if ( collected.length > 0  ) {
-              addProgressRow(progress,'NOTE: ' + collected.length + ' videos are already selected for deletion in this browser')
+          if (jsonCollected) {
+              const collected=JSON.parse(jsonCollected)
+              if ( collected.length > 0  ) {
+                  addProgressRow(progress,'NOTE: ' + collected.length + ' videos are already selected for deletion in this browser')
+              }
           }
-    }
+      }
   })
 
   registerClientRoute({
@@ -272,12 +312,17 @@ async function selectForDeletion(videos,startDate,endDate,progress,deleteBar) {
 async function selectVideos() {
     const access_token = document.defaultView.localStorage.getItem("access_token");
 
+    const year=new Date().getFullYear()
     var start=0
     var count=100
     var total=1
     const numberOfYearsAgoInput=document.getElementsByName('number-of-years-ago')[0];
     const numberOfYearsAgo=numberOfYearsAgoInput.value
     logdebug(numberOfYearsAgo)
+
+    const numberOfMonthesAgoInput=document.getElementsByName('number-of-monthes-ago')[0];
+    const numberOfMonthesAgo=parseInt(numberOfMonthesAgoInput.value)
+    logdebug(numberOfMonthesAgo)
 
     const progressBar=document.getElementsByName('progress-bar')[0];
     const progress=document.getElementsByName('progress')[0];
@@ -291,12 +336,15 @@ async function selectVideos() {
         const jsonCollected=document.defaultView.localStorage.getItem("selectedVideos",'[]')
     }
 
-    if ( numberOfYearsAgo > 0 )
+    if ( ( numberOfYearsAgo > 0 ) || (( numberOfMonthesAgo > 0 ) && ( numberOfMonthesAgo < 12 )) )
     {
         deleteUnviewed.disabled=true;
         const currentDate=new Date();
         var startDate=new Date();
-        startDate.setDate(currentDate.getDate() - ( numberOfYearsAgo * 365 ));
+        startDate.setDate(
+            currentDate.getDate()
+                - ( numberOfYearsAgo * 365 )
+                - delta_days_overlap( numberOfMonthesAgo , year -  numberOfYearsAgo));
         const startDateSinceEpoch=(startDate.getTime() / 1000);
         var endDate=currentDate;
         var jsonVideo={}
@@ -385,7 +433,7 @@ async function selectVideos() {
 
     }
     else {
-        addProgressRow(progress,'number of years invalid')
+        addProgressRow(progress,'number of years or days invalid')
     }
 }
 
