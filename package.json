@@ -1,6 +1,6 @@
 {
     "name": "peertube-plugin-manage-unviewed",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "description": "Manage unviewed videos",
     "engine": {
         "peertube": ">=3.2.0"

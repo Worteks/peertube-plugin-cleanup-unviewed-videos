@@ -5,7 +5,8 @@ Allow to delete videos unviewed for a long time.
 # Release Notes
 
 0.1.1
-- support number of monthes
+- support number of months
+- minimal support of french language
 
 0.1.0
 - support for actual deletion

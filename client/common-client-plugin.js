@@ -23,15 +23,15 @@ function delta_days(first,last,year) {
     return g-f
 }
 
-function delta_days_overlap(monthes,last,year) {
+function delta_days_overlap(months,last,year) {
     let d=0
 
-    if ( monthes <= last ) {
-        d=delta_days(last-monthes,last,year)
+    if ( months <= last ) {
+        d=delta_days(last-months,last,year)
     }
-    else if ( monthes <= 12 ) {
+    else if ( months <= 12 ) {
         let g=days(last,year)
-        let e=delta_days((12+last-monthes),12,year-1)
+        let e=delta_days((12+last-months),12,year-1)
         d=g+e
     }
     return d
@@ -72,17 +72,17 @@ async function register ({
 
   registerHook({
     target: 'filter:left-menu.links.create.result',
-    handler: (result) => {
-      return [
+      handler: async (result) => {
+        return [
         {
           key: 'manage-unviewed',
-          title: 'Manage Unviewed',
+          title: await peertubeHelpers.translate('Manage Unviewed'),
           links: [
             {
               path: peertubeHelpers.getBasePluginClientPath() + '/manage-unviewed/route',
               icon: '',
-              shortLabel: 'Unviewed',
-              label: 'Unviewed'
+                shortLabel: await peertubeHelpers.translate('Unviewed'),
+                label: await peertubeHelpers.translate('Unviewed')
             }
           ]
         }
@@ -136,12 +136,12 @@ async function register ({
 
   registerClientRoute({
     route: 'manage-unviewed/route',
-      onMount: ({ rootEl }) => {
+      onMount: async ({ rootEl }) => {
 
           const div=document.createElement('div')
           div.setAttribute('class','right-form')
           const title=document.createElement('h1')
-          title.append('Unviewed')
+          title.append(await peertubeHelpers.translate('Unviewed'))
           const form=document.createElement('form')
           if (form.addEventListener) {
               form.addEventListener("submit",
@@ -152,9 +152,11 @@ async function register ({
                                (event) => submitHandler(event) );
           }
           form.action="validateFromOnSubmit()";
-          form.innerHTML='<div>number of years ago</div><input type="number" name="number-of-years-ago" value="' + defaultYears + '"/>'
-          + '<div>number of monthes ago</div><input type="number" name="number-of-monthes-ago" value="0"/>'
-          + '<br><input type="submit" name="select-unviewed" value="Select"><input type="submit" name="delete-unviewed" value="Delete"></div>';
+          form.innerHTML='<div>' + await peertubeHelpers.translate('number of years ago') + '</div>'
+              + '<input type="number" name="number-of-years-ago" value="' + defaultYears + '"/>'
+              + '<div>' + await peertubeHelpers.translate('number of months ago') + '</div>'
+              + '<input type="number" name="number-of-months-ago" value="0"/>'
+              + '<br><input type="submit" name="select-unviewed" value="Select"><input type="submit" name="delete-unviewed" value="Delete"></div>';
           div.appendChild(title);
           div.appendChild(form);
           const progressBar=document.createElement('progress');
@@ -320,9 +322,9 @@ async function selectVideos() {
     const numberOfYearsAgo=numberOfYearsAgoInput.value
     logdebug(numberOfYearsAgo)
 
-    const numberOfMonthesAgoInput=document.getElementsByName('number-of-monthes-ago')[0];
-    const numberOfMonthesAgo=parseInt(numberOfMonthesAgoInput.value)
-    logdebug(numberOfMonthesAgo)
+    const numberOfMonthsAgoInput=document.getElementsByName('number-of-months-ago')[0];
+    const numberOfMonthsAgo=parseInt(numberOfMonthsAgoInput.value)
+    logdebug(numberOfMonthsAgo)
 
     const progressBar=document.getElementsByName('progress-bar')[0];
     const progress=document.getElementsByName('progress')[0];
@@ -336,7 +338,7 @@ async function selectVideos() {
         const jsonCollected=document.defaultView.localStorage.getItem("selectedVideos",'[]')
     }
 
-    if ( ( numberOfYearsAgo > 0 ) || (( numberOfMonthesAgo > 0 ) && ( numberOfMonthesAgo < 12 )) )
+    if ( ( numberOfYearsAgo > 0 ) || (( numberOfMonthsAgo > 0 ) && ( numberOfMonthsAgo < 12 )) )
     {
         deleteUnviewed.disabled=true;
         const currentDate=new Date();
@@ -344,7 +346,7 @@ async function selectVideos() {
         startDate.setDate(
             currentDate.getDate()
                 - ( numberOfYearsAgo * 365 )
-                - delta_days_overlap( numberOfMonthesAgo , year -  numberOfYearsAgo));
+                - delta_days_overlap( numberOfMonthsAgo , year -  numberOfYearsAgo));
         const startDateSinceEpoch=(startDate.getTime() / 1000);
         var endDate=currentDate;
         var jsonVideo={}
