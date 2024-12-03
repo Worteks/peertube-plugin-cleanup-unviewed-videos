@@ -1,12 +1,11 @@
-
 .manage-unviewed {
-  display: none;
+	display: none;
 }
 
 .show-manage-unviewed .manage-unviewed {
-  display: inline-block;
+	display: inline-block;
 }
 
 .right-form {
-    margin-left: 2rem;
+	margin-left: 2rem;
 }
