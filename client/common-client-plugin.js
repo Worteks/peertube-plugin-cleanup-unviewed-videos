@@ -40,10 +40,6 @@ function delta_days_overlap(months, last, year) {
 
 //
 
-function logdebug(info) {
-	if (debugLog) console.log(info);
-}
-
 async function register({
 	registerHook,
 	registerSettingsScript,
@@ -97,7 +93,7 @@ async function register({
 
 	registerSettingsScript({
 		isSettingHidden: (options) => {
-			logdebug(options);
+			if(debugLog) console.log(options);
 			if (
 				options.setting.name === "my-markdown-area" &&
 				options.formValues.select === "2"
@@ -112,19 +108,19 @@ async function register({
 
 	function submitHandler(event) {
 		event.preventDefault();
-		logdebug("LISTENER");
+		if(debugLog) console.log("LISTENER");
 		validateFormOnSubmit(event);
 	}
 
 	function validateFormOnSubmit(event) {
-		logdebug(event);
+		if(debugLog) console.log(event);
 		if (event.submitter.name == "select-unviewed") {
-			logdebug(document.body.classList);
+			if(debugLog) console.log(document.body.classList);
 			document.body.classList.add("video-deletion-running");
-			logdebug("validate form on submit");
+			if(debugLog) console.log("validate form on submit");
 
-			logdebug(event.target.elements[0].value);
-			logdebug("" + document.defaultView.localStorage.getItem("access_token"));
+			if(debugLog) console.log(event.target.elements[0].value);
+			if(debugLog) console.log("" + document.defaultView.localStorage.getItem("access_token"));
 
 			selectVideos();
 		}
@@ -198,7 +194,7 @@ async function register({
 	registerClientRoute({
 		route: "manage-unviewed/route/delete",
 		onMount: ({ rootEl }) => {
-			logdebug("".localStorage.getItem("access_token"));
+			if(debugLog) console.log("".localStorage.getItem("access_token"));
 		},
 	});
 }
@@ -212,7 +208,7 @@ function addProgressRow(progress, text) {
 }
 
 async function onApplicationInit(peertubeHelpers) {
-	logdebug("Manage Unviewed");
+	if(debugLog) console.log("Manage Unviewed");
 
 	const baseStaticUrl = peertubeHelpers.getBaseStaticRoute();
 
@@ -221,10 +217,10 @@ async function onApplicationInit(peertubeHelpers) {
 		.then((config) => logdebug("Got server config.", config));
 
 	const settings = await peertubeHelpers.getSettings();
-	logdebug("Settings " + settings);
+	if(debugLog) console.log("Settings " + settings);
 	enableDeletion = settings["enable-deletion"];
 	defaultYears = settings["default-years"];
-	logdebug("enableDeletion", enableDeletion);
+	if(debugLog) console.log("enableDeletion", enableDeletion);
 }
 
 async function deleteVideo(shortUUID, progress, deleteBar) {
@@ -253,13 +249,14 @@ async function deleteVideo(shortUUID, progress, deleteBar) {
 		deleteBar.setAttribute("value", deleted + 1);
 		const text = "video deleted " + shortUUID;
 		addProgressRow(progress, text);
-		logdebug(text);
+		if(debugLog) console.log(text);
 	} catch (error) {
 		console.error(error.message);
 	}
 }
 
 async function getViews(shortUUID, startDate, endDate, progress, deleteBar) {
+	return true;
 	const access_token =
 		document.defaultView.localStorage.getItem("access_token");
 	const url =
@@ -284,13 +281,13 @@ async function getViews(shortUUID, startDate, endDate, progress, deleteBar) {
 			throw new Error(`Response status: ${response.status}`);
 		}
 		const json = await response.json();
-		logdebug(json);
+		if(debugLog) console.log(json);
 		totalWatchTime = json.totalWatchTime;
 		totalViewers = json.totalViewers;
 		if (totalWatchTime == 0 && totalViewers == 0) {
 			const text = "select video for deletion " + shortUUID;
 			addProgressRow(progress, text);
-			logdebug(text);
+			if(debugLog) console.log(text);
 			return true;
 		} else {
 			const text =
@@ -301,7 +298,7 @@ async function getViews(shortUUID, startDate, endDate, progress, deleteBar) {
 				" totalViewers=" +
 				totalViewers;
 			addProgressRow(progress, text);
-			logdebug(text);
+			if(debugLog) console.log(text);
 			return false;
 		}
 	} catch (error) {
@@ -320,7 +317,7 @@ async function selectForDeletion(
 	var collected = new Array();
 	const addviewed = async function (jsonVideo) {
 		var shortUUID = jsonVideo.shortUUID;
-		logdebug(shortUUID);
+		if(debugLog) console.log(shortUUID);
 		const keep = await getViews(
 			shortUUID,
 			startDate,
@@ -330,7 +327,7 @@ async function selectForDeletion(
 		);
 		if (keep) {
 			collected.push(shortUUID);
-			logdebug("collected", collected);
+			if(debugLog) console.log("collected", collected);
 		}
 	};
 	// can't use forEach on async function
@@ -338,9 +335,9 @@ async function selectForDeletion(
 	for (const viewed of videos) {
 		await addviewed(viewed);
 	}
-	logdebug(collected);
+	if(debugLog) console.log(collected);
 	var jsonCollected = JSON.stringify(collected);
-	logdebug(jsonCollected);
+	if(debugLog) console.log(jsonCollected);
 
 	return collected;
 }
@@ -357,13 +354,13 @@ async function selectVideos() {
 		"number-of-years-ago",
 	)[0];
 	const numberOfYearsAgo = numberOfYearsAgoInput.value;
-	logdebug(numberOfYearsAgo);
+	if(debugLog) console.log(numberOfYearsAgo);
 
 	const numberOfMonthsAgoInput = document.getElementsByName(
 		"number-of-months-ago",
 	)[0];
 	const numberOfMonthsAgo = parseInt(numberOfMonthsAgoInput.value);
-	logdebug(numberOfMonthsAgo);
+	if(debugLog) console.log(numberOfMonthsAgo);
 
 	const progressBar = document.getElementsByName("progress-bar")[0];
 	const progress = document.getElementsByName("progress")[0];
@@ -417,7 +414,7 @@ async function selectVideos() {
 					throw new Error(`Response status: ${response.status}`);
 				}
 				const json = await response.json();
-				logdebug(json);
+				if(debugLog) console.log(json);
 				total = json.total;
 				var pos = start;
 				if (total > 0) {
@@ -437,7 +434,7 @@ async function selectVideos() {
 								" publishedAt " +
 								publishedAt +
 								" after deletion period";
-							logdebug(text);
+							if(debugLog) console.log(text);
 						} else {
 							toDelete.push(jsonVideo);
 						}
@@ -451,7 +448,7 @@ async function selectVideos() {
 
 		if (testForceSelectedVideos) {
 			// TEST ONLY
-			logdebug("WARNING TEST testForceSelectedVideos");
+			if(debugLog) console.log("WARNING TEST testForceSelectedVideos");
 			toDelete = ["ahahah", "lfkjqdslfkj", "lkdjsKL"];
 		}
 
@@ -465,7 +462,7 @@ async function selectVideos() {
 			var collected = [];
 			if (testForceSelectedVideos) {
 				// TEST ONLY
-				logdebug("WARNING TEST");
+				if(debugLog) console.log("WARNING TEST");
 				collected = ["ahahah", "lfkjqdslfkj", "lkdjsKL"];
 			} else {
 				collected = await selectForDeletion(
@@ -477,7 +474,7 @@ async function selectVideos() {
 				);
 			}
 			const jsonCollected = JSON.stringify(collected);
-			logdebug(jsonCollected);
+			if(debugLog) console.log(jsonCollected);
 			// save collectecd into local storage
 			document.defaultView.localStorage.setItem(
 				"selectedVideos",
