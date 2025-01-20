@@ -1,7 +1,7 @@
 {
-	"name": "peertube-plugin-manage-unviewed",
-	"version": "0.1.1",
-	"description": "Manage unviewed videos",
+	"name": "peertube-plugin-cleanup-unviewed-videos",
+	"version": "0.2.0",
+	"description": "Cleanup videos that have not been viewed for a long time",
 	"engine": {
 		"peertube": ">=3.2.0"
 	},
@@ -10,7 +10,7 @@
 		"plugin"
 	],
 	"homepage": "https://www.worteks.com",
-	"author": "artlog",
+	"author": "Sébastien NOBILI <code@pipoprods.org>",
 	"bugs": "https://www.worteks.com",
 	"library": "./main.js",
 	"staticDirs": {

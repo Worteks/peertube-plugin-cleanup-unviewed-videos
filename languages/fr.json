@@ -1,6 +1,16 @@
 {
-	"Unviewed": "Non Vues",
-	"number of years ago": "depuis combien d'années",
-	"number of months ago": "depuis combien de mois",
-	"Manage Unviewed": "Videos non vues"
+	"Cleanup Unviewed Videos": "Nettoyage des vidéos non-vues",
+	"Unviewed": "Vidéos non-vues",
+	"Cleanup": "Nettoyage",
+	"Last view age": "Ancienneté de la dernière vue",
+	"Years": "Années",
+	"Months": "Mois",
+	"Days": "Jours",
+	"Search": "Rechercher",
+	"Delete selected videos": "Supprimer les vidéos sélectionnées",
+	"No video match your search criteria.": "Aucune vidéo ne correspond à vos critères.",
+	"Searching for videos unseen since": "Recherche de vidéos non-vues depuis",
+	"Enable deletion": "Activer la suppression",
+	"When this disabled, videos won't be actually deleted.": "Quand cette option est désactivée, les vidéos ne sont pas vraiment supprimées.",
+	"Default value for search form.": "Valeur par défaut du formulaire"
 }

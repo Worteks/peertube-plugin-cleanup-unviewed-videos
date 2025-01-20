@@ -1,11 +1,40 @@
-.manage-unviewed {
-	display: none;
-}
+div.cleanup-unviewed-videos-main {
+	padding: 1rem;
 
-.show-manage-unviewed .manage-unviewed {
-	display: inline-block;
-}
+	form div.content-col {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+	}
 
-.right-form {
-	margin-left: 2rem;
+	div.form-group {
+		width: 10rem;
+	}
+
+	div.video-list-container {
+		margin-top: 2rem;
+
+		div.button-container {
+			display: flex;
+
+			progress {
+				margin-left: 2rem;
+				flex-grow: 1;
+			}
+		}
+
+		ul {
+			margin-top: 2rem;
+
+			li {
+				display: flex;
+				align-items: flex-start;
+				margin-bottom: 2rem;
+
+				input[type="checkbox"] {
+					margin-right: 1rem;
+				}
+			}
+		}
+	}
 }

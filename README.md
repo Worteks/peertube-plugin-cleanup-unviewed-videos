@@ -1,8 +1,21 @@
-# Manage Unviewed
+# Cleanup Unviewed Videos
 
-Allow to delete videos unviewed for a long time.
+Select videos for deletion according to their last view date.
+
+When the plugin is installed it will add a "Cleanup" => "Unseen Videos" in main
+menu.
+
+Default configuration of the plugin disables deletion. The plugin will fake the
+deletion process but nothing will be done.
+
+Deletion can be enabled from the plugin settings.
 
 ## Release Notes
+
+### 0.2.0
+
+- huge refactoring
+- UI layout
 
 ### 0.1.1
 
