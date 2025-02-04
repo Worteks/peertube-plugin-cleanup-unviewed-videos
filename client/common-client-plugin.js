@@ -310,16 +310,14 @@ const register = (() => {
 			target: "action:auth-user.information-loaded",
 			handler: ({ user }) => {
 				user_is_admin = user.role.id === 0; // 0 : UserRole.ADMINISTRATOR
-				if (user_is_admin) {
-					const i = setInterval(() => {
-						if (document.querySelector(".cleanup-unviewed-videos.menu-block")) {
-							document.querySelector(
-								".cleanup-unviewed-videos.menu-block",
-							).style.display = "inline-block";
-							clearInterval(i);
-						}
-					}, 500);
-				}
+				const i = setInterval(() => {
+					if (document.querySelector(".cleanup-unviewed-videos.menu-block")) {
+						document.querySelector(
+							".cleanup-unviewed-videos.menu-block",
+						).style.display = user_is_admin ? "inline-block" : "none";
+						clearInterval(i);
+					}
+				}, 500);
 			},
 		});
 

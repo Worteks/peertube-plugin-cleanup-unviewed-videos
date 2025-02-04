@@ -1,3 +1,9 @@
+div.menu-wrapper {
+	ul.cleanup-unviewed-videos.menu-block {
+		display: none;
+	}
+}
+
 div.cleanup-unviewed-videos-main {
 	padding: 1rem;
 
