@@ -1,6 +1,6 @@
 {
 	"name": "peertube-plugin-cleanup-unviewed-videos",
-	"version": "0.2.0",
+	"version": "1.0.0",
 	"description": "Cleanup videos that have not been viewed for a long time",
 	"engine": {
 		"peertube": ">=3.2.0"
