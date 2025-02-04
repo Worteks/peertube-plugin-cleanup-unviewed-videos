@@ -329,6 +329,7 @@ const register = (() => {
 		 */
 		registerClientRoute({
 			route: "cleanup-unviewed-videos",
+			title: await helpers.translate("Cleanup Unviewed Videos"),
 			onMount: create_form,
 		});
 	};
