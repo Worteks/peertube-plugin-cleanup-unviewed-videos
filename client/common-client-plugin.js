@@ -61,8 +61,8 @@ const register = (() => {
 
 					<div class="video-list-container">
 						<div class="button-container">
-							<button id="${prefix}-delete-button" class="peertube-button orange-button" style="visibility: hidden;">${await helpers.translate("Delete selected videos")}</button>
 							<progress id="${prefix}-progress" style="visibility: hidden;"></progress>
+							<button id="${prefix}-delete-button" class="peertube-button orange-button" style="visibility: hidden;">${await helpers.translate("Delete selected videos")}</button>
 						</div>
 						<ul id="${prefix}-video-list"></ul>
 					</div>
@@ -153,10 +153,13 @@ const register = (() => {
 		videos.forEach((video) => {
 			const element = document.createElement("li");
 			element.innerHTML = `
-					<input type="checkbox" checked name="${video.shortUUID}">
+					<label class="checkbox">
+						<input type="checkbox" checked name="${video.shortUUID}">
+						<span></span>
+					</label>
 					<a href="${video.url}" target="_blank">
-						<div>
-							<img src="${video.previewPath}">
+						<img src="${video.previewPath}">
+						<div class="info">
 							<div class="video-name">${video.name}</div>
 							<div class="date">${new Date(video.createdAt).toLocaleString()}</div>
 						</div>

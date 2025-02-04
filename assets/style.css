@@ -24,7 +24,7 @@ div.cleanup-unviewed-videos-main {
 			display: flex;
 
 			progress {
-				margin-left: 2rem;
+				margin-right: 2rem;
 				flex-grow: 1;
 			}
 		}
@@ -34,15 +34,75 @@ div.cleanup-unviewed-videos-main {
 
 			li {
 				display: flex;
-				align-items: flex-start;
+				align-items: center;
 				margin-bottom: 2rem;
 
-				input[type="checkbox"] {
-					margin-right: 1rem;
+				label.checkbox {
+					position: relative;
+					width: 18px;
+					height: 18px;
+					cursor: pointer;
+					margin-inline-end: 1.25rem;
+
+					input[type="checkbox"] {
+						position: absolute;
+						height: 0;
+						width: 0;
+					}
+
+					span {
+						position: relative;
+						display: inline-block;
+						left: 0;
+						height: 18px;
+						width: 18px;
+						border: 1px solid var(--inputBorderColor);
+						background-color: none;
+						border-radius: 3px;
+
+						&::after {
+							content: "";
+							position: absolute;
+							display: none;
+							left: 5px;
+							top: 1px;
+							width: 6px;
+							height: 11px;
+							border: solid white;
+							border-width: 0 2px 2px 0;
+							transform: rotate(45deg);
+						}
+					}
+
+					input[type="checkbox"]:checked ~ span {
+						background-color: var(--mainHoverColor);
+						border: 1px solid var(--mainHoverColor);
+
+						&::after {
+							display: block;
+						}
+					}
 				}
 
 				a {
 					color: inherit;
+					width: 100%;
+					display: flex;
+					align-items: flex-start;
+					gap: 15px;
+
+					div.info {
+						flex-grow: 1;
+
+						div.video-name {
+							font-size: 1.3rem;
+							font-weight: bold;
+						}
+
+						div.date {
+							font-size: 14px;
+						}
+					}
 				}
 
 				img {
