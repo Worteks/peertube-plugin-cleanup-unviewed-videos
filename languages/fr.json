@@ -9,7 +9,7 @@
 	"Search": "Rechercher",
 	"Delete selected videos": "Supprimer les vidéos sélectionnées",
 	"No video match your search criteria.": "Aucune vidéo ne correspond à vos critères.",
-	"Searching for videos unseen since": "Recherche de vidéos non-vues depuis",
+	"Searching for videos unseen since": "Recherche de vidéos non-vues depuis le",
 	"Enable deletion": "Activer la suppression",
 	"When this disabled, videos won't be actually deleted.": "Quand cette option est désactivée, les vidéos ne sont pas vraiment supprimées.",
 	"Default value for search form.": "Valeur par défaut du formulaire"

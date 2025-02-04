@@ -114,7 +114,7 @@ const register = (() => {
 		);
 
 		display_user_feedback(
-			`${await helpers.translate("Searching for videos unseen since")} ${ref_date}`,
+			`${await helpers.translate("Searching for videos unseen since")} ${ref_date.toLocaleString()}`,
 			true,
 		);
 
@@ -158,7 +158,7 @@ const register = (() => {
 						<div>
 							<img src="${video.previewPath}">
 							<div class="video-name">${video.name}</div>
-							<div class="date">${new Date(video.createdAt)}</div>
+							<div class="date">${new Date(video.createdAt).toLocaleString()}</div>
 						</div>
 					</a>
 				`;
