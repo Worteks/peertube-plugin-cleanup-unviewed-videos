@@ -12,6 +12,12 @@ Deletion can be enabled from the plugin settings.
 
 ## Release Notes
 
+### 1.0.0
+
+- fix: UI doesn't match the application identity
+- fix: date display doesn't respect user locale
+- fix: menu item is visible whatever the user profile
+
 ### 0.2.0
 
 - huge refactoring
