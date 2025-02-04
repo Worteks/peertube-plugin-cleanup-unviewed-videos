@@ -41,6 +41,10 @@ div.cleanup-unviewed-videos-main {
 					margin-right: 1rem;
 				}
 
+				a {
+					color: inherit;
+				}
+
 				img {
 					width: 285px;
 				}
