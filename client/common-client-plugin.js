@@ -317,7 +317,7 @@ const register = (() => {
 					if (document.querySelector(".cleanup-unviewed-videos.menu-block")) {
 						document.querySelector(
 							".cleanup-unviewed-videos.menu-block",
-						).style.display = user_is_admin ? "inline-block" : "none";
+						).style.display = user_is_admin ? "block" : "none";
 						clearInterval(i);
 					}
 				}, 500);
