@@ -289,7 +289,7 @@ const register = (() => {
 		registerHook({
 			target: "filter:left-menu.links.create.result",
 			handler: async (menu_entries) => {
-				return [
+				return menu_entries.concat([
 					{
 						key: "cleanup-unviewed-videos",
 						title: await helpers.translate("Cleanup"),
@@ -304,7 +304,7 @@ const register = (() => {
 							},
 						],
 					},
-				].concat(menu_entries);
+				]);
 			},
 		});
 
