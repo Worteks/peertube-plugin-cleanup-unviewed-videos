@@ -12,6 +12,11 @@ Deletion can be enabled from the plugin settings.
 
 ## Release Notes
 
+### 1.1.0
+
+- fix: menu entry position above quick access entries
+- fix: menu layout is broken in peertube 7.x
+
 ### 1.0.0
 
 - fix: UI doesn't match the application identity
