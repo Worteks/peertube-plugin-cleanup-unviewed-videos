@@ -56,7 +56,7 @@ div.cleanup-unviewed-videos-main {
 						left: 0;
 						height: 18px;
 						width: 18px;
-						border: 1px solid var(--inputBorderColor);
+						border: 1px solid var(--input-fg);
 						background-color: none;
 						border-radius: 3px;
 
@@ -74,9 +74,9 @@ div.cleanup-unviewed-videos-main {
 						}
 					}
 
-					input[type="checkbox"]:checked ~ span {
-						background-color: var(--mainHoverColor);
-						border: 1px solid var(--mainHoverColor);
+                    input[type="checkbox"]:checked~span {
+                        background-color: var(--input-fg);
+                        border: 1px solid var(--input-fg);
 
 						&::after {
 							display: block;
