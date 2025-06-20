@@ -12,6 +12,10 @@ Deletion can be enabled from the plugin settings.
 
 ## Release Notes
 
+### 1.1.1
+
+- fix: checkboxes are not visible
+
 ### 1.1.0
 
 - fix: menu entry position above quick access entries
