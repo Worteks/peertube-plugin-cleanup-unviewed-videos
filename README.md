@@ -12,6 +12,10 @@ Deletion can be enabled from the plugin settings.
 
 ## Release Notes
 
+### 1.2.1
+
+- feat: server-side processing
+
 ### 1.1.2
 
 - fix: menu entry is visible when no user is connected

@@ -1,6 +1,5 @@
 const register = (() => {
 	const debug = false;
-	const pagination_count = 100;
 
 	let user_is_admin = false;
 
@@ -13,9 +12,6 @@ const register = (() => {
 		delete_button,
 		checkboxes,
 		progress;
-
-	// Lock/unlock actual deletion
-	let enable_deletion = false;
 
 	// This will receive peertube helpers from register function
 	let helpers;
@@ -107,6 +103,8 @@ const register = (() => {
 	) {
 		delete_button.style.visibility = "hidden";
 
+		years_old |= 0;
+
 		const ref_date = get_absolute_date_from_age(
 			years_old,
 			months_old,
@@ -118,27 +116,9 @@ const register = (() => {
 			true,
 		);
 
-		// Eligible videos will be appended to this array
-		const videos = [];
-
-		// Loop though pages of raw search results (whatever the date)
-		let page = 0;
-		let has_more_data = true;
-		while (has_more_data) {
-			const json = await request_api(
-				`/api/v1/videos?isLocal=true&privacyOneOf=1&privacyOneOf=4&privacyOneOf=3&privacyOneOf=2&privacyOneOf=5&start=${page++ * pagination_count}&count=${pagination_count}`,
-			);
-			has_more_data = json.data.length === pagination_count;
-
-			for (const video of json.data) {
-				if (
-					new Date(video.updatedAt) <= ref_date && // If video was published after reference date, then were sure it won't match requirements
-					(await get_video_view_count(video.shortUUID, ref_date)) === 0
-				) {
-					videos.push(video);
-				}
-			}
-		}
+		// Get videos list
+		const videos = await request_api(
+			`/plugins/cleanup-unviewed-videos/router?years=${years_old}&months=${months_old}&days=${days_old}`);
 
 		// Useful for simulating video post-deletion state when developing
 		if (fake_empty_list) {
@@ -152,9 +132,10 @@ const register = (() => {
 		checkboxes = [];
 		videos.forEach((video) => {
 			const element = document.createElement("li");
+			element.setAttribute("video-id", video.id);
 			element.innerHTML = `
 					<label class="checkbox">
-						<input type="checkbox" checked name="${video.shortUUID}">
+						<input type="checkbox" checked video-id="${video.id}">
 						<span></span>
 					</label>
 					<a href="${video.url}" target="_blank">
@@ -181,27 +162,17 @@ const register = (() => {
 	 * Trigger videos deletion
 	 */
 	async function delete_selected_videos() {
-		const checked = checkboxes.filter((element) => element.checked);
-		if (debug)
-			console.log(
-				"Videos selected for deletion: ",
-				checked.map((element) => element.name),
-			);
+		const ids = checkboxes.filter((element) => element.checked).map((c) => parseInt(c.getAttribute("video-id"), 10));
+		if (debug) console.log("Videos to delete", ids);
 
 		progress.value = 0;
-		progress.max = checked.length;
-		progress.style.visibility = checked.length ? "visible" : "hidden";
-		for (const input of checked) {
-			const uuid = input.name;
-			if (enable_deletion) {
-				await request_api(`/api/v1/videos/${uuid}`, "DELETE");
-			} else {
-				console.log(`DELETE /api/v1/videos/${uuid}`);
-				// Fake API delay
-				await new Promise((resolve) => setTimeout(resolve, 1000));
-			}
+		progress.max = ids.length;
+		progress.style.visibility = ids.length ? "visible" : "hidden";
+		for (const id of ids) {
+			await request_api(`/plugins/cleanup-unviewed-videos/router/${id}`, "DELETE");
 			progress.value++;
-			input.parentElement.remove();
+
+			[...document.getElementsByTagName("li")].find((e) => parseInt(e.getAttribute("video-id"), 10) === id).remove();
 		}
 
 		progress.style.visibility = "hidden";
@@ -212,16 +183,6 @@ const register = (() => {
 			parseInt(days_old_input.value, 10),
 			true,
 		);
-	}
-
-	/**
-	 * Get view count for a video since a reference date
-	 */
-	async function get_video_view_count(uuid, ref_date) {
-		const json = await request_api(
-			`/api/v1/videos/${uuid}/stats/overall?startDate=${ref_date.toISOString()}`,
-		);
-		return json.totalViewers;
 	}
 
 	/**
@@ -237,8 +198,6 @@ const register = (() => {
 	 */
 	async function load_settings() {
 		settings = await helpers.getSettings();
-		enable_deletion = settings["enable-deletion"];
-		console.log(`deletion is ${enable_deletion ? "enabled" : "disabled"}`);
 
 		access_token = document.defaultView.localStorage.getItem("access_token");
 	}
